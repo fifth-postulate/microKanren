@@ -14,6 +14,8 @@ public interface Term<T> {
     static <V> Term<V> variable(Variable variable) {
         return Var.iable(variable);
     }
+
+    boolean isVariable();
 }
 
 class Value<T> implements Term<T> {
@@ -39,6 +41,11 @@ class Value<T> implements Term<T> {
     public int hashCode() {
         return Objects.hash(value);
     }
+
+    @Override
+    public boolean isVariable() {
+        return false;
+    }
 }
 
 class Var<T> implements Term<T> {
@@ -46,7 +53,7 @@ class Var<T> implements Term<T> {
         return new Var(variable);
     }
 
-    private final Variable variable;
+    public final Variable variable;
 
     private Var(Variable variable) {
         this.variable = variable;
@@ -63,5 +70,10 @@ class Var<T> implements Term<T> {
     @Override
     public int hashCode() {
         return Objects.hash(variable);
+    }
+
+    @Override
+    public boolean isVariable() {
+        return true;
     }
 }

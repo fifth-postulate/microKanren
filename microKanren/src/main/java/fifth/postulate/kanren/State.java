@@ -1,5 +1,7 @@
 package fifth.postulate.kanren;
 
+import java.util.Optional;
+
 import static fifth.postulate.kanren.Term.variable;
 
 /**
@@ -18,6 +20,11 @@ public class State<T> {
         this.substitution = Substitution.empty();
     }
 
+    private State(Variable fresh, Substitution<T> substitution) {
+        this.fresh = fresh;
+        this.substitution = substitution;
+    }
+
     public Term<T> walk(Term<T> term) {
         if (substitution.containsKey(term)) {
             Term<T> association = substitution.get(term);
@@ -25,6 +32,29 @@ public class State<T> {
         } else {
             return term;
         }
+    }
+
+    public Optional<State<T>> unify(Term<T> left, Term<T> right) {
+        Term<T> leftWalk = walk(left);
+        Term<T> rightWalk = walk(right);
+        if (leftWalk.equals(rightWalk)) {
+            return Optional.of(this);
+        }
+        if (leftWalk.isVariable()) {
+            Variable variable = ((Var) leftWalk).variable;
+            Substitution<T> substitution = Substitution.extend(variable, rightWalk, this.substitution);
+            return Optional.of(this.with(substitution));
+        }
+        if (rightWalk.isVariable()) {
+            Variable variable = ((Var) rightWalk).variable;
+            Substitution<T> substitution = Substitution.extend(variable, leftWalk, this.substitution);
+            return Optional.of(this.with(substitution));
+        }
+        return Optional.empty();
+    }
+
+    private State<T> with(Substitution<T> substitution) {
+        return new State(this.fresh, substitution);
     }
 }
 
@@ -34,7 +64,7 @@ interface Substitution<T> {
     }
 
     static <V> Substitution<V> extend(Variable variable, Term<V> term, Substitution<V> chain) {
-        return extend(variable, term, chain);
+        return Association.extend(variable, term, chain);
     }
 
     boolean containsKey(Term<T> term);

@@ -18,6 +18,10 @@ public interface Stream<T> {
     static <V> Stream<V> mature(State<V> state, Stream<V> tail) {
         return matureStream(state, tail);
     }
+
+    static <V> Stream<V> unit(State<V> state) {
+        return mature(state, empty());
+    }
 }
 
 enum EmptyStream implements fifth.postulate.kanren.Stream {
