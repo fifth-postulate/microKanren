@@ -10,10 +10,15 @@ public class Variable {
         return new Variable(0);
     }
 
-    private final int index;
+    public final int index;
 
     private Variable(int index) {
         this.index = index;
+    }
+
+
+    public Variable next() {
+        return new Variable(index + 1);
     }
 
     @Override

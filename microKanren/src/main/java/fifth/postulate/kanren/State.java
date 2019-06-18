@@ -1,6 +1,7 @@
 package fifth.postulate.kanren;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 
 import static fifth.postulate.kanren.Term.variable;
 
@@ -56,6 +57,18 @@ public class State<T> {
     private State<T> with(Substitution<T> substitution) {
         return new State(this.fresh, substitution);
     }
+
+    public Stream<T> apply(Function<Term<T>, Goal<T>> f) {
+        return f.apply(Var.iable(fresh)).apply(next());
+    }
+
+    private State<T> next() {
+        return new State(fresh.next(), substitution);
+    }
+
+    public void reify(Reifier<T> reifier) {
+        reifier.accept(substitution);
+    }
 }
 
 interface Substitution<T> {
@@ -70,6 +83,8 @@ interface Substitution<T> {
     boolean containsKey(Term<T> term);
 
     Term<T> get(Term<T> term);
+
+    Collection<Term<T>> keys();
 }
 
 class Association<T> implements Substitution {
@@ -100,6 +115,13 @@ class Association<T> implements Substitution {
             return chain.get(term);
         }
     }
+
+    @Override
+    public Collection<Term<T>> keys() {
+        List<Term<T>> keys = Arrays.asList(key);
+        keys.addAll(chain.keys());
+        return keys;
+    }
 }
 
 class Empty<T> implements Substitution<T> {
@@ -120,6 +142,11 @@ class Empty<T> implements Substitution<T> {
     @Override
     public Term<T> get(Term<T> term) {
         return term;
+    }
+
+    @Override
+    public Collection<Term<T>> keys() {
+        return Collections.emptyList();
     }
 }
 

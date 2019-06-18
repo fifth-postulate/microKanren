@@ -11,4 +11,10 @@ public interface Goal<T> extends Function<State<T>, Stream<T>> {
                      .orElse(Stream.empty());
         };
     }
+
+    static <V> Goal<V> callFresh(Function<Term<V>, Goal<V>> f) {
+        return (state) -> {
+            return state.apply(f);
+        };
+    }
 }
